@@ -1,7 +1,8 @@
 const connection = new WebSocket("ws://localhost:9090")
 
 const CallingController = (() => {
- 
+    let stream;
+
     const elements = () => {
         return { 
             loginBox: document.getElementById('login_box'),
@@ -19,7 +20,7 @@ const CallingController = (() => {
 
     const getUserMediaDevices = () => {
         navigator.getUserMedia({ video: true, audio: true }, (myStream) => {
-
+            stream = myStream;
         }, error => {
 
         });
