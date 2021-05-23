@@ -59,3 +59,17 @@ form button:focus {
 .login-box {
     margin-top: 170px;
 }
+
+/* VIDEO CALL START */
+.video_call {
+    background-color: darkred;
+    height: 100vh;
+}
+
+.video_call .call_frame {
+    padding-top: 9px;
+    padding-left: 21px;
+    height: 100%;
+    border: 0px solid darkred;
+    border-radius: 10px !important;
+}
