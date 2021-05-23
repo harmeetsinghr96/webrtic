@@ -3,7 +3,10 @@ const connection = new WebSocket("ws://localhost:9090")
 const CallingController = (() => {
  
     const elements = () => {
-        return { loginBox: document.getElementById('login_box') }
+        return { 
+            loginBox: document.getElementById('login_box'),
+            videoBox: document.getElementById('video_box'),
+        }
     }
 
     const getUserName = () => {
@@ -41,17 +44,20 @@ connection.onopen = () => console.log('Connected to the server');
 connection.onerror = (error) => console.log('Socket Error: ', error);
 connection.onmessage = (data) => CallingController.listenToSocket(data);
 const userName = CallingController.getUserName();
-
+const { loginBox, videoBox } = CallingController.elements();
 
 if (userName != null) {
-    const { loginBox } = CallingController.elements();
     loginBox.style.display = "none";  
+    videoBox.style.display = "block";
     
     setTimeout(() => {
         let data = { user: userName };
         CallingController.emitSocket(connection, 'JOINED', data); 
         CallingController.getUserMediaDevices();
     }, 1000);
+} else {
+    videoBox.style.display = "none";
+    loginBox.style.display = "block";  
 }
 
  
