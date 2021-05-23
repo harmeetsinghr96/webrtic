@@ -1,18 +1,43 @@
-const controller = (() => {
+const LoginController = (() => {
 
-    const inputs = { 
-        email: document.getElementById('email').value, 
-        password: document.getElementById('password').value
+    const inputs = () => { 
+       return {
+            username: document.getElementById('username').value
+        }
+    }
+
+    const isError = (values) => {
+        let errors = [];
+        const { username } = values;
+
+        if (username.trim().length <= 0) {
+            errors.push({ error: 'Password is required' });
+        }
+
+        return errors;
+    }
+
+    const displayErrors = (errors) => {
+        for (const err of errors) {
+            alert(err.error);
+        }
     }
 
     return {
-        inputs
+        inputs,
+        isError,
+        displayErrors
     }
 })();
 
 
 function formSubmit() {
-    const { email, password } = controller.inputs;
+    const { username } = LoginController.inputs();
+    let errors = LoginController.isError({ username });
+    if (errors.length > 0) {
+        return LoginController.displayErrors(errors);
+    }
 
-    alert(email);
+    window.location = `?username=${username}`;
 }
+

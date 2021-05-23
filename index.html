@@ -11,17 +11,13 @@
 <body class="bg-light">
     <section class="container-fluid">
         <div class="row justify-content-center">
-            <div class="col-sm-4 login-box">
+            <div class="col-sm-4 login-box" id="login_box">
                 <h2 class="text-center"> Login </h2>
 
                 <form class="col-sm-12" autocomplete="off">
                     <div class="mb-3">
-                      <label for="email" class="form-label">Email address</label>
-                      <input type="email" class="form-control" id="email">
-                    </div>
-                    <div class="mb-3">
-                      <label for="password" class="form-label">Password</label>
-                      <input type="password" class="form-control" id="password">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username">
                     </div>
 
                     <button onclick="formSubmit()" type="button" class="btn btn-primary">Submit</button>
@@ -32,4 +28,5 @@
 </body>
 
 <script src="./src/js/client.js"></script>
+<script src="./src/js/calling.js"></script>
 </html>
