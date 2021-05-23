@@ -1,10 +1,11 @@
 {
-  "name": "webrtc",
+  "name": "web_rtc",
   "version": "1.0.0",
-  "description": "",
+  "description": "1: npm install --save wscat\r 2: npm install --save node-static",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js  "
   },
   "keywords": [
     "webrtc"
@@ -14,5 +15,14 @@
   "dependencies": {
     "node-static": "^0.7.11",
     "wscat": "^4.0.1"
-  }
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/harmeetsinghr96/webrtic.git"
+  },
+  "bugs": {
+    "url": "https://github.com/harmeetsinghr96/webrtic/issues"
+  },
+  "homepage": "https://github.com/harmeetsinghr96/webrtic#readme"
 }
