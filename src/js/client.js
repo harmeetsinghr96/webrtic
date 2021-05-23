@@ -1,28 +1,18 @@
-// const connection = new WebSocket("ws://localhost:9090")
+const controller = (() => {
 
-// connection.onopen = () => {
-//     console.log('Connected to the server');
-// }
+    const inputs = { 
+        email: document.getElementById('email').value, 
+        password: document.getElementById('password').value
+    }
 
-// connection.onmessage = (msg) => {
-//     const data = JSON.parse(msg.data);
-// }
+    return {
+        inputs
+    }
+})();
 
-// connection.onerror = (error) => {
-//     console.log(error);
-// }
 
-// const urlString = window.location.href;
-// const url = new URL(urlString);
-// const userName = url.searchParams.get("username");
+function formSubmit() {
+    const { email, password } = controller.inputs;
 
-// function getUsername() {
-//     let username = document.getElementById("username").value;
-//     window.location = `?username=${username}`;
-// }
-
-// navigator.getUserMedia({ video: true, audio: true }, (myStream) => {
-
-// }, error => {
-
-// });
+    alert(email);
+}
