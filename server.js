@@ -6,8 +6,8 @@ const CallingController = (() => {
     let users = {};
     
     const emitSocket = (_conn, data) => {
-        console.log(data);
-        // _conn.send(JSON.stringify(msg));    
+        data = JSON.stringify(data);
+        _conn.send(data);
     }
 
     const listenSocket = (data) => {
