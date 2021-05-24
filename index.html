@@ -35,11 +35,26 @@
         <!-- VIDEO CALL START -->
 
         <div id="video_box">
-            <div class="row video_call">
-                <div class="col-sm-12 call_frame">
+            <div class="row justify-content-around video_call">
+                <div class="col-sm-8 call_frame">
                     <div class="video_call_tag">
-                        <div id="side_my_own_video">
-                            <video width="1323" height="620" id="local_video_sream" autoplay></video>
+                        <div class="side_my_own_video" id="side_my_own_video">
+                            <video width="620 height="620" id="local_video_sream" autoplay></video>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-sm-3 side_frame">
+                    <div class="row">
+                        <div class="col-sm-12 call_window">
+                            <form class="col-sm-12" autocomplete="off">
+                                <div class="mb-3">
+                                    <label for="username" class="form-label">Username</label>
+                                    <input type="text" class="form-control" id="username">
+                                </div>
+            
+                                <button onclick="formSubmit()" type="button" class="btn btn-primary">Call</button>
+                              </form>
                         </div>
                     </div>
                 </div>

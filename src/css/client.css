@@ -62,14 +62,29 @@ form button:focus {
 
 /* VIDEO CALL START */
 .video_call {
-    background-color: darkred;
+    border: 0px solid lightsteelblue;
     height: 100vh;
 }
 
 .video_call .call_frame {
-    padding-top: 9px;
-    padding-left: 21px;
-    height: 100%;
-    border: 0px solid darkred;
+    margin: 10px 0px;
+    height: 97%;
+    border: 10px solid darkred;
     border-radius: 10px !important;
+}
+
+.side_frame {
+    margin: 10px 0px;
+    height: 97%;
+    border: 10px solid darkred;
+    border-radius: 10px !important;
+}
+
+.side_frame .call_window form {
+    padding: 10px 0 0 0;
+}
+
+.side_frame .call_window form label {
+    font-size: 20px;
+    font-weight: bolder !important;
 }
