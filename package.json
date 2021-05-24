@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js  "
+    "start": "nodemon server.js  "
   },
   "keywords": [
     "webrtc"
@@ -17,7 +17,9 @@
     "cogo-toast": "^4.2.3",
     "wscat": "^4.0.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/harmeetsinghr96/webrtic.git"
