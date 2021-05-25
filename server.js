@@ -30,6 +30,12 @@ const CallingController = (() => {
       case "OFFER":
         _createCallOffer(_conn, payload);
         break;
+      case "ANSWER":
+        _answeredCall(_conn, payload);
+        break;
+      case "CANDIDATE":
+        _handlerCandidate(_conn, results);
+        break;
     }
   };
 
@@ -65,9 +71,37 @@ const CallingController = (() => {
     const callToConnection = users[to];  
     if (callToConnection !== null) {
       users[from].otherUser = users[to].user;
-      sendResponse(callToConnection, "OFFER_LISTENER", 200, { message: 'Call time', data: { offer, from: users[from].user }});
+      sendResponse(callToConnection, "OFFER_LISTENER", 200, { message: 'Call time', data: { offer, from: users[from].user, to: users[to].user }});
     } else {
       sendResponse(_conn, "OFFER_LISTENER", 400, { message: 'User is not found into records.!!', data: {}});
+    }
+  }
+
+  const _answeredCall = (_conn, payload) => {
+    let { answer, from, to } = payload;
+    from.userName = from.userName.toLowerCase();
+    to.userName = to.userName.toLowerCase();
+
+    console.log(payload);
+    
+    const answerToConnection = users[to];  
+    if (answerToConnection !== null) {
+      users[from].otherUser = users[to].user;
+      sendResponse(answerToConnection, "ANSWER_LISTENER", 200, { message: 'answered time', data: { answer, from: users[from].user, to: users[to].user }});
+    } else {
+      sendResponse(_conn, "OFFER_LISTENER", 400, { message: 'User is not found into records.!!', data: {}});
+    }
+  }
+
+  const _handlerCandidate = (_conn, payload) => {
+    let { candidate, user } = payload;
+    user = user.toLowerCase();
+
+    const connectCandidate = users[user];
+    if (connectCandidate !== null) {
+      sendResponse(connectCandidate, "CANDIDATE_LISTENER", 200, { message: 'Candidate Established..!!', data: { candidate }});
+    } else {
+      sendResponse(_conn, "CANDIDATE_LISTENER", 400, { message: 'Candidate can not be initialized.!!', data: {}});
     }
   }
 

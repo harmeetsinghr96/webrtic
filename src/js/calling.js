@@ -22,6 +22,7 @@ const CallingController = (() => {
 
   const getUserMediaDevices = () => {
     const { videoStream } = elements();
+    const user = getUserName();
 
     navigator.getUserMedia(
       {
@@ -34,6 +35,11 @@ const CallingController = (() => {
 
         rtcpConnection = _CreateRtpConection();
         rtcpConnection.addStream(stream);
+        rtcpConnection.onicecandidate = (event) => {
+          if (event.candidate) {
+            emitSocket(connection, "CANDIDATE", { candidate: event.candidate, user });
+          }
+        }
       },
       (errorStream) => {
         console.log("Streaming Error: ", errorStream);
@@ -77,6 +83,15 @@ const CallingController = (() => {
       case "OFFER_LISTENER":
         _incomingCall(_conn, results);
         break;
+
+      case "ANSWER_LISTENER":
+          _callAnsweredByuser(_conn, results);
+          break;
+      
+      case "CANDIDATE_LISTENER":
+        _handleCandidate(_conn, results);
+        break;  
+        
     }
   };
 
@@ -96,10 +111,9 @@ const CallingController = (() => {
   };
 
   const _incomingCall = (_conn, results) => {
-    console.log(results);
     const {
       status,
-      data: { message, data: { offer, from: { userName } } },
+      data: { message, data: { offer, from, to } },
     } = results;
 
     if (status === 400) {
@@ -107,9 +121,48 @@ const CallingController = (() => {
     }
 
     rtcpConnection.setRemoteDescription(new RTCSessionDescription(offer));
-    alert(userName);
+    if (confirm(`Incomeing Call from, ${from.userName}`)) {
+      _answerCall({ offer, from, to });
+    }
   };
 
+  const _answerCall = (data) => {
+    rtcpConnection.createAnswer((answer) => {
+      rtcpConn.setLocalDescription(answer);
+      emitSocket(connection, "ANSWER", { answer, from: data.to, to: data.from  });
+    }, (error) => {
+      alert('Error, in answering call.');
+    })
+  }
+
+  const _callAnsweredByuser = (_conn, results) => {
+    const {
+      status,
+      data: { message, data: { answer, from, to } },
+    } = results;
+
+    if (status === 400) {
+      return alert(message);
+    }
+
+    rtcpConnection.setRemoteDescription(new RTCSessionDescription(answer));
+
+  }
+
+  const _handleCandidate = (_conn, results) => {
+    const {
+      status,
+      data: { message, data: { candidate } },
+    } = results;
+
+    if (status === 400) {
+      return alert(message);
+    }
+
+    rtcpConnection.addIceCandidate(new RTCIceCandidate(candidate));
+  }
+
+  
   return {
     elements,
     listenToSocket,
@@ -148,7 +201,6 @@ function callNow() {
     rtcpConn.createOffer((offer) => {
       CallingController.emitSocket(connection, "OFFER", { offer, to: callTo, from: userName  });
       rtcpConn.setLocalDescription(offer);
-    
     }, (error) => {
       alert("Calling can not be created..!!");
     });
