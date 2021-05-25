@@ -34,7 +34,7 @@ const CallingController = (() => {
         _answeredCall(_conn, payload);
         break;
       case "CANDIDATE":
-        _handlerCandidate(_conn, results);
+        _handlerCandidate(_conn, payload);
         break;
     }
   };
@@ -79,8 +79,8 @@ const CallingController = (() => {
 
   const _answeredCall = (_conn, payload) => {
     let { answer, from, to } = payload;
-    from.userName = from.userName.toLowerCase();
-    to.userName = to.userName.toLowerCase();
+    from = from.userName.toLowerCase();
+    to = to.userName.toLowerCase();
 
     console.log(payload);
     

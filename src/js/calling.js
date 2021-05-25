@@ -1,7 +1,7 @@
 const connection = new WebSocket("ws://localhost:9090");
 
 const CallingController = (() => {
-  let stream = {}, userDetails = {}, rtcpConnection = {};
+  let stream = {}, userDetails = {}, rtcpConnection = {}, offerToUser = "";
 
   const elements = () => {
     return {
@@ -37,7 +37,7 @@ const CallingController = (() => {
         rtcpConnection.addStream(stream);
         rtcpConnection.onicecandidate = (event) => {
           if (event.candidate) {
-            emitSocket(connection, "CANDIDATE", { candidate: event.candidate, user });
+            emitSocket(connection, "CANDIDATE", { candidate: event.candidate, user: offerToUser });
           }
         }
       },
@@ -85,8 +85,8 @@ const CallingController = (() => {
         break;
 
       case "ANSWER_LISTENER":
-          _callAnsweredByuser(_conn, results);
-          break;
+        _callAnsweredByuser(_conn, results);
+        break;
       
       case "CANDIDATE_LISTENER":
         _handleCandidate(_conn, results);
@@ -121,14 +121,16 @@ const CallingController = (() => {
     }
 
     rtcpConnection.setRemoteDescription(new RTCSessionDescription(offer));
-    if (confirm(`Incomeing Call from, ${from.userName}`)) {
+    if (confirm("Incoming Call")) {
       _answerCall({ offer, from, to });
+    } else {
+      // reject;
     }
   };
 
   const _answerCall = (data) => {
     rtcpConnection.createAnswer((answer) => {
-      rtcpConn.setLocalDescription(answer);
+      rtcpConnection.setLocalDescription(answer);
       emitSocket(connection, "ANSWER", { answer, from: data.to, to: data.from  });
     }, (error) => {
       alert('Error, in answering call.');
@@ -162,13 +164,18 @@ const CallingController = (() => {
     rtcpConnection.addIceCandidate(new RTCIceCandidate(candidate));
   }
 
+  const returnOfferTouser = (toUser) => {
+    offerToUser = toUser;
+    return offerToUser;
+  }
   
   return {
     elements,
     listenToSocket,
     getUserName,
     emitSocket,
-    returnRtcpConnection
+    returnRtcpConnection,
+    returnOfferTouser
   };
 })();
 
@@ -199,6 +206,7 @@ function callNow() {
   if (callTo.trim().length > 0) {
     const rtcpConn = CallingController.returnRtcpConnection();
     rtcpConn.createOffer((offer) => {
+      CallingController.returnOfferTouser(callTo);
       CallingController.emitSocket(connection, "OFFER", { offer, to: callTo, from: userName  });
       rtcpConn.setLocalDescription(offer);
     }, (error) => {
