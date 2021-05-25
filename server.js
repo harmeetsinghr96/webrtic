@@ -26,6 +26,10 @@ const CallingController = (() => {
       case "JOINED":
         _userJoined(_conn, payload);
         break;
+
+      case "OFFER":
+        _createCallOffer(_conn, payload);
+        break;
     }
   };
 
@@ -52,6 +56,20 @@ const CallingController = (() => {
       data: users[user].user,
     });
   };
+
+  const _createCallOffer = (_conn, payload) => {
+    let { offer, to, from } = payload;
+    to = to.toLowerCase();
+    from = from.toLowerCase();
+
+    const callToConnection = users[to];  
+    if (callToConnection !== null) {
+      users[from].otherUser = users[to].user;
+      sendResponse(callToConnection, "OFFER_LISTENER", 200, { message: 'Call time', data: { offer, from: users[from].user }});
+    } else {
+      sendResponse(_conn, "OFFER_LISTENER", 400, { message: 'User is not found into records.!!', data: {}});
+    }
+  }
 
   return {
     emitSocket,
