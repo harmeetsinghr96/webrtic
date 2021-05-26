@@ -7,7 +7,9 @@ const CallingController = (() => {
 
   const emitSocket = (_conn, data) => {
     data = JSON.stringify(data);
-    _conn.send(data);
+    if (_conn) {
+      _conn.send(data);
+    }
   };
 
   const sendResponse = (_conn, type, status, data) => {
@@ -36,6 +38,10 @@ const CallingController = (() => {
       case "CANDIDATE":
         _handlerCandidate(_conn, payload);
         break;
+      case "REJECTED":
+        _rejectedCall(_conn, payload);
+        break;
+        
     }
   };
 
@@ -82,14 +88,26 @@ const CallingController = (() => {
     from = from.userName.toLowerCase();
     to = to.userName.toLowerCase();
 
-    console.log(payload);
-    
     const answerToConnection = users[to];  
     if (answerToConnection !== null) {
       users[from].otherUser = users[to].user;
+
       sendResponse(answerToConnection, "ANSWER_LISTENER", 200, { message: 'answered time', data: { answer, from: users[from].user, to: users[to].user }});
     } else {
-      sendResponse(_conn, "OFFER_LISTENER", 400, { message: 'User is not found into records.!!', data: {}});
+      sendResponse(_conn, "ANSWER_LISTENER", 400, { message: 'Failed in response answer.!!', data: {}});
+    }
+  }
+
+  const _rejectedCall = (_conn, payload) => {
+    let { offer, from, to } = payload;
+    from = from.userName.toLowerCase();
+    to = to.userName.toLowerCase();
+
+    const rejectToConnection = users[to];  
+    if (rejectToConnection !== null) {
+      sendResponse(rejectToConnection, "REJECTED_LISTENER", 200, { message: 'Call has been rejected by other user', data: { offer, from: users[from].user, to: users[to].user }});
+    } else {
+      sendResponse(_conn, "REJECTED_LISTENER", 400, { message: 'Error in rejection.!!', data: {}});
     }
   }
 

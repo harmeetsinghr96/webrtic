@@ -8,7 +8,8 @@ const CallingController = (() => {
       loginBox: document.getElementById("login_box"),
       videoBox: document.getElementById("video_box"),
       videoStream: document.getElementById("local_video_sream"),
-      callerUserName: document.getElementById("caller_username")
+      callerUserName: document.getElementById("caller_username"),
+      otherCallerVideoStream: document.getElementById("other_local_video_sream")
     };
   };
 
@@ -35,6 +36,13 @@ const CallingController = (() => {
 
         rtcpConnection = _CreateRtpConection();
         rtcpConnection.addStream(stream);
+        rtcpConnection.onaddstream = (event) => {
+          if (event.stream) {
+            elements().otherCallerVideoStream.srcObject = event.stream;
+          } else {
+            alert('Error in other user streaming..');
+          }
+        };
         rtcpConnection.onicecandidate = (event) => {
           if (event.candidate) {
             emitSocket(connection, "CANDIDATE", { candidate: event.candidate, user: offerToUser });
@@ -83,15 +91,15 @@ const CallingController = (() => {
       case "OFFER_LISTENER":
         _incomingCall(_conn, results);
         break;
-
       case "ANSWER_LISTENER":
         _callAnsweredByuser(_conn, results);
         break;
-      
       case "CANDIDATE_LISTENER":
         _handleCandidate(_conn, results);
-        break;  
-        
+        break;
+      case "REJECTED_LISTENER":
+        _rejectedCallByUser(_conn, results);
+        break;
     }
   };
 
@@ -121,17 +129,23 @@ const CallingController = (() => {
     }
 
     rtcpConnection.setRemoteDescription(new RTCSessionDescription(offer));
-    if (confirm("Incoming Call")) {
+    if (conf irm("Incoming Call")) {
       _answerCall({ offer, from, to });
     } else {
-      // reject;
+      _rejectCall({ offer, from, to });
     }
   };
 
+  const _rejectCall = (data) => {
+    const { offer, from, to } = data;
+    emitSocket(connection, "REJECTED", { offer, from: to, to: from  });
+  }
+
   const _answerCall = (data) => {
     rtcpConnection.createAnswer((answer) => {
+      const { from, to } = data;
       rtcpConnection.setLocalDescription(answer);
-      emitSocket(connection, "ANSWER", { answer, from: data.to, to: data.from  });
+      emitSocket(connection, "ANSWER", { answer, from: to, to: from  });
     }, (error) => {
       alert('Error, in answering call.');
     })
@@ -148,8 +162,21 @@ const CallingController = (() => {
     }
 
     rtcpConnection.setRemoteDescription(new RTCSessionDescription(answer));
-
   }
+
+  const _rejectedCallByUser = (_conn, results) => {
+    const {
+      status,
+      data: { message, data: { answer, from, to } },
+    } = results;
+
+    if (status === 400) {
+      return alert(message);
+    }
+
+    alert(message);
+  }
+
 
   const _handleCandidate = (_conn, results) => {
     const {
