@@ -129,7 +129,7 @@ const CallingController = (() => {
     }
 
     rtcpConnection.setRemoteDescription(new RTCSessionDescription(offer));
-    if (conf irm("Incoming Call")) {
+    if (confirm("Incoming Call")) {
       _answerCall({ offer, from, to });
     } else {
       _rejectCall({ offer, from, to });
