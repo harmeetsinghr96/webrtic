@@ -78,6 +78,7 @@ form button:focus {
     height: 97%;
     border: 10px solid darkred;
     border-radius: 10px !important;
+    position: relative;
 }
 
 .side_frame .call_window form {

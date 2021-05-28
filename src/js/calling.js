@@ -1,7 +1,7 @@
 const connection = new WebSocket("ws://localhost:9090");
 
 const CallingController = (() => {
-  let stream = {}, userDetails = {}, rtcpConnection = {}, offerToUser = "";
+  let stream = {}, userDetails = {}, rtcpConnection = {}, offerToUser = "", dataChannel = {};
 
   const elements = () => {
     return {
@@ -35,25 +35,51 @@ const CallingController = (() => {
         videoStream.srcObject = stream;
 
         rtcpConnection = _CreateRtpConection();
-        rtcpConnection.addStream(stream);
-        rtcpConnection.onaddstream = (event) => {
-          if (event.stream) {
-            elements().otherCallerVideoStream.srcObject = event.stream;
-          } else {
-            alert('Error in other user streaming..');
-          }
-        };
-        rtcpConnection.onicecandidate = (event) => {
-          if (event.candidate) {
-            emitSocket(connection, "CANDIDATE", { candidate: event.candidate, user: offerToUser });
-          }
-        }
+        _addingStreams();
+        _initOnIceCandidate();
+        _initDataChannelForMessage();
       },
       (errorStream) => {
         console.log("Streaming Error: ", errorStream);
       }
     );
   };
+
+  const _addingStreams = () => {
+    rtcpConnection.addStream(stream);
+    rtcpConnection.onaddstream = (event) => {
+      if (event.stream) {
+        elements().otherCallerVideoStream.srcObject = event.stream;
+      } else {
+        alert('Error in other user streaming..');
+      }
+    };
+  }
+
+  const _initOnIceCandidate = () => {
+    rtcpConnection.onicecandidate = (event) => {
+      if (event.candidate) {
+        emitSocket(connection, "CANDIDATE", { candidate: event.candidate, user: offerToUser });
+      }
+    }
+  }
+
+  const _initDataChannelForMessage = () => {
+    dataChannel = rtcpConnection.createDataChannel("oneTwoOneChat", {
+      reliable: true
+    });
+    dataChannel.onerror = (error) => {
+      console.log('Data Channel Error', error);
+    }
+    dataChannel.onmessage = (data) => {
+      console.log('Message data', data);
+
+      dataChannel.send() // send message using this send // add data in brackets (msg); 
+    }
+    dataChannel.onclose = () => {
+      console.log('Data Channel has been closed');
+    }
+  }
 
   const emitSocket = (_conn, type, payload) =>
     _conn.send(JSON.stringify({ type, payload })
@@ -99,6 +125,9 @@ const CallingController = (() => {
         break;
       case "REJECTED_LISTENER":
         _rejectedCallByUser(_conn, results);
+        break;
+      case "LEAVE_LISTENER":
+        _userLeft(_conn, results);
         break;
     }
   };
@@ -177,6 +206,13 @@ const CallingController = (() => {
     alert(message);
   }
 
+  const _userLeft = (_conn, results) => {
+    elements().otherCallerVideoStream.srcObject = null;
+    stream = null;
+    rtcpConnection.close();
+    rtcpConnection.onicecandidate = null;
+    rtcpConnection.onaddstream = null;
+  }
 
   const _handleCandidate = (_conn, results) => {
     const {
@@ -195,6 +231,10 @@ const CallingController = (() => {
     offerToUser = toUser;
     return offerToUser;
   }
+
+  const returnStream = () => {
+    return stream;
+  }
   
   return {
     elements,
@@ -202,7 +242,8 @@ const CallingController = (() => {
     getUserName,
     emitSocket,
     returnRtcpConnection,
-    returnOfferTouser
+    returnOfferTouser,
+    returnStream
   };
 })();
 
@@ -240,4 +281,18 @@ function callNow() {
       alert("Calling can not be created..!!");
     });
   }
+}
+
+function toggleVideo() {
+  const stream = CallingController.returnStream();
+  stream.getVideoTracks()[0].enable = !(stream.getVideoTracks()[0].enabled);
+}
+
+function toggleAudio() {
+  const stream = CallingController.returnStream();
+  stream.getAudioTracks()[0].enable = !(stream.getAudioTracks()[0].enabled);
+}
+
+function hangupCall() {
+  CallingController.emitSocket(connection, "LEAVE", { user: userName });
 }

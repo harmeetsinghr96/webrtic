@@ -39,9 +39,21 @@
                 <div class="col-sm-8 call_frame">
                     <div class="video_call_tag">
                         <div class="side_my_own_video" id="side_my_own_video">
-                            <video width="620 height="620" id="local_video_sream" autoplay></video>
-                            <video width="620 height="620" id="other_local_video_sream" autoplay></video>
+                            <div class="row justify-content-around">
+                                <div class="col-sm-5">
+                                    <video width="400" height="500" id="local_video_sream" autoplay></video>
+                                </div>
+                                <div class="col-sm-5">
+                                    <video width="400" height="500" id="other_local_video_sream" autoplay></video>
+                                </div>
+                            </div>
                         </div>
+                    </div>
+
+                    <div stylle="position: absolute; bottom: 20px;">
+                        <button class="btn btn-primary" onclick="toggleAudio()">audio</button>
+                        <button class="btn btn-primary" onclick="toggleVideo()">Video</button>
+                        <button class="btn btn-danger" onclick="hangupCall()">End</button>
                     </div>
                 </div>
 

@@ -21,6 +21,17 @@ const CallingController = (() => {
     _checkPayload(_conn, data);
   };
 
+  const closeSocket = (_conn, data) => {
+    if (_conn.user) {
+      delete users[_conn.user.userName];
+      if (_conn.user.otherUser) {
+        delete users[_conn.user.userName];
+        const otherUser = users[_conn.otherUser.userName];
+        sendResponse(otherUser, "LEAVE_LISTENER", 200, { message: 'Candidate Established..!!', data: {}});
+      }
+    }
+  }
+
   const _checkPayload = async (_conn, data) => {
     const { type, payload } = data;
 
@@ -41,7 +52,9 @@ const CallingController = (() => {
       case "REJECTED":
         _rejectedCall(_conn, payload);
         break;
-        
+      case "LEAVE":
+          _leaveCall(_conn, payload);
+          break;
     }
   };
 
@@ -123,14 +136,30 @@ const CallingController = (() => {
     }
   }
 
+  const _leaveCall = (_conn, payload) => {
+    let { user } = payload;
+    user = user.toLowerCase();
+
+    const laveingUser = users[user];
+    if (laveingUser !== null) {
+      const otherUser = users[laveingUser.otherUser.userName];
+      sendResponse(otherUser, "LEAVE_LISTENER", 200, { message: 'Candidate Established..!!', data: {}});
+      laveingUser.otherUser = null;
+      otherUser.otherUser = null;
+    } else {
+      sendResponse(_conn, "LEAVE_LISTENER", 400, { message: 'Issue in hangup calling..!!', data: {}});
+    }
+  }
+
   return {
     emitSocket,
     listenSocket,
+    closeSocket
   };
 })();
 
 console.log("Connected to server..!!");
 wss.on("connection", (_conn) => {
   _conn.on("message", (data) => CallingController.listenSocket(_conn, data));
-  _conn.on("close", () => console.log("User Disconnected..!!"));
+  _conn.on("close", () => CallingController.closeSocket(_conn, data));
 });
